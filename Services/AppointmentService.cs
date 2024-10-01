@@ -15,82 +15,88 @@ namespace advent_appointment_booking.Services
         }
 
         // Create Appointment (Trucking Company only)
-       public async Task<CreateAppointmentDTO> CreateAppointment(Appointment appointment)
-{
-    var truckingCompany = await _databaseContext.TruckingCompanies.FindAsync(appointment.TrCompanyId);
-    if (truckingCompany == null)
-        throw new Exception("Invalid Trucking Company.");
-
-    var terminal = await _databaseContext.Terminals.FindAsync(appointment.TerminalId);
-    if (terminal == null)
-        throw new Exception("Invalid Terminal.");
-
-    var driver = await _databaseContext.Drivers.FindAsync(appointment.DriverId);
-    if (driver == null)
-        throw new Exception("Driver does not exist.");
-
-    var isContainerAlreadyScheduled = await _databaseContext.Appointments.AnyAsync(a => a.ContainerNumber == appointment.ContainerNumber);
-    if(isContainerAlreadyScheduled)
-    {
-        throw new Exception("Appointment for the entered container number already exists.");
-    }
-
-    // Generate custom gate code: first two letters of Trucking Company + first three digits of Terminal ID
-    string gateCode = $"{truckingCompany.TrCompanyName.Substring(0, 2).ToUpper()}{terminal.TerminalId.ToString().PadLeft(3, '0')}";
-    appointment.GateCode = gateCode;
-
-    // Use selected appointment date from the request
-    appointment.AppointmentCreated = appointment.AppointmentCreated;  // Use the provided time slot
-    appointment.AppointmentLastModified = DateTime.UtcNow;
-    appointment.AppointmentValidThrough = appointment.AppointmentCreated.AddDays(2); // Example: 2 days valid
-    appointment.AppointmentStatus = "Scheduled";
-
-    await _databaseContext.Appointments.AddAsync(appointment);
-    await _databaseContext.SaveChangesAsync();
-
-    return new CreateAppointmentDTO
-    {
-        TrCompanyName = truckingCompany.TrCompanyName,
-        GstNo = truckingCompany.GstNo,
-        TransportLicNo = truckingCompany.TransportLicNo,
-        PortName = terminal.PortName,
-        Address = terminal.Address,
-        City = terminal.City,
-        State = terminal.State,
-        Country = terminal.Country,
-        DriverName = driver.DriverName,
-        PlateNo = driver.PlateNo,
-        PhoneNumber = driver.PhoneNumber,
-        MoveType = appointment.MoveType,
-        ContainerNumber = appointment.ContainerNumber,
-        SizeType = appointment.SizeType,
-        Line = appointment.Line,
-        ChassisNo = appointment.ChassisNo,
-        AppointmentStatus = appointment.AppointmentStatus,
-        AppointmentCreated = appointment.AppointmentCreated,
-        AppointmentValidThrough = appointment.AppointmentValidThrough,
-        AppointmentLastModified = appointment.AppointmentLastModified,
-        GateCode = appointment.GateCode
-    };
-}
-
- public async Task<IEnumerable<TerminalDTO>> GetAllTerminals()
-{
-    return await _databaseContext.Terminals
-        .Select(t => new TerminalDTO
+        public async Task<CreateAppointmentDTO> CreateAppointment(Appointment appointment)
         {
-            TerminalId = t.TerminalId,
-            PortName = t.PortName,
-            Address = t.Address,
-            City = t.City,
-            State = t.State,
-            Country = t.Country,
-            Email = t.Email,
-            CreatedAt = t.CreatedAt,
-            UpdatedAt = t.UpdatedAt
-        })
-        .ToListAsync();
-}
+            var truckingCompany = await _databaseContext.TruckingCompanies.FindAsync(appointment.TrCompanyId);
+            if (truckingCompany == null)
+                throw new Exception("Invalid Trucking Company.");
+
+            var terminal = await _databaseContext.Terminals.FindAsync(appointment.TerminalId);
+            if (terminal == null)
+                throw new Exception("Invalid Terminal.");
+
+            var driver = await _databaseContext.Drivers.FindAsync(appointment.DriverId);
+            if (driver == null)
+                throw new Exception("Driver does not exist.");
+
+            var isContainerAlreadyScheduled = await _databaseContext.Appointments.AnyAsync(a => a.ContainerNumber == appointment.ContainerNumber);
+            if (isContainerAlreadyScheduled)
+            {
+                throw new Exception("Appointment for the entered container number already exists.");
+            }
+
+            // Generate custom gate code: first two letters of Trucking Company + first three digits of Terminal ID
+            string gateCode = $"{truckingCompany.TrCompanyName.Substring(0, 2).ToUpper()}{terminal.TerminalId.ToString().PadLeft(3, '0')}";
+            appointment.GateCode = gateCode;
+
+            // Assuming appointment.AppointmentCreated is already provided in UTC, convert it to IST
+            appointment.AppointmentCreated = TimeZoneInfo.ConvertTimeFromUtc(appointment.AppointmentCreated, TimeZoneInfo.FindSystemTimeZoneById("India Standard Time"));
+
+            // Set AppointmentLastModified to the current time in IST
+            appointment.AppointmentLastModified = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("India Standard Time"));
+
+            // Set AppointmentValidThrough to 2 days after 'AppointmentCreated' in IST
+            appointment.AppointmentValidThrough = appointment.AppointmentCreated.AddDays(2);
+
+            // Set the appointment status to 'Scheduled'
+            appointment.AppointmentStatus = "Scheduled";
+
+            await _databaseContext.Appointments.AddAsync(appointment);
+            await _databaseContext.SaveChangesAsync();
+
+            return new CreateAppointmentDTO
+            {
+                TrCompanyName = truckingCompany.TrCompanyName,
+                GstNo = truckingCompany.GstNo,
+                TransportLicNo = truckingCompany.TransportLicNo,
+                PortName = terminal.PortName,
+                Address = terminal.Address,
+                City = terminal.City,
+                State = terminal.State,
+                Country = terminal.Country,
+                DriverName = driver.DriverName,
+                PlateNo = driver.PlateNo,
+                PhoneNumber = driver.PhoneNumber,
+                MoveType = appointment.MoveType,
+                ContainerNumber = appointment.ContainerNumber,
+                SizeType = appointment.SizeType,
+                Line = appointment.Line,
+                ChassisNo = appointment.ChassisNo,
+                AppointmentStatus = appointment.AppointmentStatus,
+                AppointmentCreated = appointment.AppointmentCreated,
+                AppointmentValidThrough = appointment.AppointmentValidThrough,
+                AppointmentLastModified = appointment.AppointmentLastModified,
+                GateCode = appointment.GateCode
+            };
+        }
+
+        public async Task<IEnumerable<TerminalDTO>> GetAllTerminals()
+        {
+            return await _databaseContext.Terminals
+                .Select(t => new TerminalDTO
+                {
+                    TerminalId = t.TerminalId,
+                    PortName = t.PortName,
+                    Address = t.Address,
+                    City = t.City,
+                    State = t.State,
+                    Country = t.Country,
+                    Email = t.Email,
+                    CreatedAt = t.CreatedAt,
+                    UpdatedAt = t.UpdatedAt
+                })
+                .ToListAsync();
+        }
 
 
 
@@ -98,7 +104,7 @@ namespace advent_appointment_booking.Services
         public async Task<string> UpdateAppointment(int appointmentId, Appointment updatedAppointment)
         {
             var appointment = await _databaseContext.Appointments.FindAsync(appointmentId);
-            if (appointment == null )
+            if (appointment == null)
                 throw new Exception("Unauthorized or invalid appointment.");
 
             appointment.MoveType = updatedAppointment.MoveType;
@@ -109,33 +115,80 @@ namespace advent_appointment_booking.Services
             // appointment.TerminalId = updatedAppointment.TerminalId;
             // appointment.DriverId = updatedAppointment.DriverId;
             appointment.AppointmentLastModified = DateTime.UtcNow;
-            appointment.AppointmentCreated=updatedAppointment.AppointmentCreated;
+            appointment.AppointmentCreated = updatedAppointment.AppointmentCreated;
             _databaseContext.Appointments.Update(appointment);
             await _databaseContext.SaveChangesAsync();
 
             return "Appointment updated successfully.";
         }
-      
-// public async Task<string> UpdateAppointmentCreatedTime(int appointmentId, DateTime newCreatedTime)
-// {
-//     // Find the appointment by its ID
-//     var appointment = await _databaseContext.Appointments.FindAsync(appointmentId);
-    
-//     if (appointment == null)
-//     {
-//         throw new Exception("Appointment not found.");
-//     }
+        public async Task<List<CreateAppointmentDTO>> GetAppointments(DateTime? filterDate)
+{
+    IQueryable<Appointment> query = _databaseContext.Appointments
+        .Include(a => a.Driver)
+        .Include(a => a.TruckingCompany)
+        .Include(a => a.Terminal); // Include related entities
 
-//     // Update only the AppointmentCreated field
-//     appointment.AppointmentCreated = newCreatedTime;
-//     appointment.AppointmentLastModified = DateTime.UtcNow;
+    if (filterDate.HasValue)
+    {
+        // Normalize the date to ensure we're comparing only the date portion
+        var filterDateStart = filterDate.Value.Date;
+        var filterDateEnd = filterDateStart.AddDays(1);
 
-//     // Mark the appointment as updated and save the changes
-//     _databaseContext.Appointments.Update(appointment);
-//     await _databaseContext.SaveChangesAsync();
+        // Filter appointments by the selected date
+        query = query.Where(a => a.AppointmentCreated >= filterDateStart && a.AppointmentCreated < filterDateEnd);
+    }
 
-//     return "Appointment created time updated successfully.";
-// }
+    // Map appointments to CreateAppointmentDTO
+    var appointments = await query.Select(a => new CreateAppointmentDTO
+    {
+        PortName = a.Terminal.PortName,
+        Address = a.Terminal.Address,
+        City = a.Terminal.City,
+        State = a.Terminal.State,
+        Country = a.Terminal.Country,
+        Email = a.TruckingCompany.Email,
+        PlateNo = a.Driver.PlateNo,
+        PhoneNumber = a.Driver.PhoneNumber,
+        TrCompanyName = a.TruckingCompany.TrCompanyName,
+        GstNo = a.TruckingCompany.GstNo,
+        TransportLicNo = a.TruckingCompany.TransportLicNo,
+        DriverName = a.Driver.DriverName,
+        MoveType = a.MoveType,
+        Appointmentid = a.AppointmentId,
+        ContainerNumber = a.ContainerNumber,
+        SizeType = a.SizeType,
+        Line = a.Line,
+        ChassisNo = a.ChassisNo,
+        AppointmentStatus = a.AppointmentStatus,
+        AppointmentCreated = a.AppointmentCreated,
+        AppointmentValidThrough = a.AppointmentValidThrough,
+        AppointmentLastModified = a.AppointmentLastModified,
+        GateCode = a.GateCode
+    }).ToListAsync();
+
+    return appointments;
+}
+
+        // public async Task<string> UpdateAppointmentCreatedTime(int appointmentId, DateTime newCreatedTime)
+        // {
+        //     // Find the appointment by its ID
+        //     var appointment = await _databaseContext.Appointments.FindAsync(appointmentId);
+
+        //     if (appointment == null)
+        //     {
+        //         throw new Exception("Appointment not found.");
+        //     }
+
+        //     // Update only the AppointmentCreated field
+        //     appointment.AppointmentCreated = newCreatedTime;
+        //     appointment.AppointmentLastModified = DateTime.UtcNow;
+
+        //     // Mark the appointment as updated and save the changes
+        //     _databaseContext.Appointments.Update(appointment);
+        //     await _databaseContext.SaveChangesAsync();
+
+        //     return "Appointment created time updated successfully.";
+        // }
 
 
 
@@ -189,12 +242,12 @@ namespace advent_appointment_booking.Services
                     TrCompanyName = a.TruckingCompany.TrCompanyName,
                     GstNo = a.TruckingCompany.GstNo,
                     TransportLicNo = a.TruckingCompany.TransportLicNo,
-                    Email=a.TruckingCompany.Email,
+                    Email = a.TruckingCompany.Email,
                     MoveType = a.MoveType,
                     ContainerNumber = a.ContainerNumber,
                     SizeType = a.SizeType,
                     Line = a.Line,
-                    Appointmentid=a.AppointmentId,
+                    Appointmentid = a.AppointmentId,
                     ChassisNo = a.ChassisNo,
                     DriverName = a.Driver.DriverName,
                     PlateNo = a.Driver.PlateNo,

@@ -25,7 +25,7 @@ namespace advent_appointment_booking.Controllers
         [Authorize(Policy = Policy.RequireTruckingCompanyRole)]
         public async Task<IActionResult> CreateAppointment([FromBody] Appointment appointment)
         {
-            _logger.Info(DateTime.Today.ToLongDateString()+" : Appointment creation process started ...");
+            _logger.Info(DateTime.Today.ToLongDateString() + " : Appointment creation process started ...");
             if (!ModelState.IsValid)
             {
                 var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
@@ -36,13 +36,13 @@ namespace advent_appointment_booking.Controllers
             try
             {
                 var result = await _appointmentService.CreateAppointment(appointment);
-                _logger.Info(DateTime.Today.ToLongDateString()+": Appointment created successfully.");
+                _logger.Info(DateTime.Today.ToLongDateString() + ": Appointment created successfully.");
                 return Ok(result);
             }
             catch (Exception ex)
             {
-                _logger.Error(DateTime.Today.ToLongDateString() + " Appointment creation failed "  + ex.Message);
-                return BadRequest(new {message = ex.Message});
+                _logger.Error(DateTime.Today.ToLongDateString() + " Appointment creation failed " + ex.Message);
+                return BadRequest(new { message = ex.Message });
             }
         }
 
@@ -50,29 +50,29 @@ namespace advent_appointment_booking.Controllers
         [Authorize(Policy = Policy.RequireTruckingCompanyOrTerminalRole)]
         public async Task<IActionResult> UpdateAppointment(int appointmentId, [FromBody] Appointment appointment)
         {
-            _logger.Info(DateTime.Today.ToLongDateString()+" : Updating appointment process started for Id   "  + appointmentId);
+            _logger.Info(DateTime.Today.ToLongDateString() + " : Updating appointment process started for Id   " + appointmentId);
 
             if (!ModelState.IsValid)
             {
                 var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
-                _logger.Error(DateTime.Today.ToLongDateString()+" : Validation failed  " + errors);
+                _logger.Error(DateTime.Today.ToLongDateString() + " : Validation failed  " + errors);
                 return BadRequest(new { message = "Validation failed", errors });
             }
 
             try
             {
                 var result = await _appointmentService.UpdateAppointment(appointmentId, appointment);
-                _logger.Info(DateTime.Today.ToLongDateString()+" : Appointment updated successfully " +  appointmentId);
+                _logger.Info(DateTime.Today.ToLongDateString() + " : Appointment updated successfully " + appointmentId);
 
                 return Ok(new { message = result });
             }
             catch (Exception ex)
             {
-                _logger.Error(DateTime.Today.ToLongDateString()+" : Failed to update appointment with Id  " + appointmentId + " " + ex.Message);
+                _logger.Error(DateTime.Today.ToLongDateString() + " : Failed to update appointment with Id  " + appointmentId + " " + ex.Message);
                 return BadRequest(new { message = ex.Message });
             }
         }
-       
+
 
 
 
@@ -80,46 +80,47 @@ namespace advent_appointment_booking.Controllers
         [Authorize(Policy = Policy.RequireTruckingCompanyOrTerminalRole)]
         public async Task<IActionResult> GetAppointmentById(int appointmentId)
         {
-            _logger.Info(DateTime.Today.ToLongDateString()+" : GetAppointment process strated for Id  " +  appointmentId);
+            _logger.Info(DateTime.Today.ToLongDateString() + " : GetAppointment process strated for Id  " + appointmentId);
 
             try
             {
                 var result = await _appointmentService.GetAppointment(appointmentId);
-                _logger.Info(DateTime.Today.ToLongDateString()+" : Fetched appointment successfully using  id " + appointmentId);
+                _logger.Info(DateTime.Today.ToLongDateString() + " : Fetched appointment successfully using  id " + appointmentId);
 
                 return Ok(result);
             }
-            catch (Exception ex) {
-                _logger.Error(DateTime.Today.ToLongDateString()+" : Failed to fetch appointment details using appointmentId  " + ex.Message);
-                return NotFound(new { message = ex.Message});
+            catch (Exception ex)
+            {
+                _logger.Error(DateTime.Today.ToLongDateString() + " : Failed to fetch appointment details using appointmentId  " + ex.Message);
+                return NotFound(new { message = ex.Message });
             }
         }
-        
-[HttpGet("terminals")]
-[Authorize(Policy =Policy.RequireTruckingCompanyOrTerminalRole)]  // Adjust the authorization policy as needed
-public async Task<IActionResult> GetAllTerminals()
-{
-    _logger.Info(DateTime.Today.ToLongDateString() + " : GetAllTerminals process started");
 
-    try
-    {
-        var result = await _appointmentService.GetAllTerminals();
-        _logger.Info(DateTime.Today.ToLongDateString() + " : Fetched all terminals successfully");
+        [HttpGet("terminals")]
+        [Authorize(Policy = Policy.RequireTruckingCompanyOrTerminalRole)]  // Adjust the authorization policy as needed
+        public async Task<IActionResult> GetAllTerminals()
+        {
+            _logger.Info(DateTime.Today.ToLongDateString() + " : GetAllTerminals process started");
 
-        return Ok(result);
-    }
-    catch (Exception ex)
-    {
-        _logger.Error(DateTime.Today.ToLongDateString() + " : Failed to fetch terminals " + ex.Message);
-        return BadRequest(new { message = ex.Message });
-    }
-}
+            try
+            {
+                var result = await _appointmentService.GetAllTerminals();
+                _logger.Info(DateTime.Today.ToLongDateString() + " : Fetched all terminals successfully");
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(DateTime.Today.ToLongDateString() + " : Failed to fetch terminals " + ex.Message);
+                return BadRequest(new { message = ex.Message });
+            }
+        }
 
         [HttpGet("all")]
         [Authorize(Policy = Policy.RequireTruckingCompanyOrTerminalRole)]
         public async Task<IActionResult> GetAllAppointments([FromQuery] string format = "json")
         {
-            _logger.Info(DateTime.Today.ToLongDateString()+" : GetAppointments process started");
+            _logger.Info(DateTime.Today.ToLongDateString() + " : GetAppointments process started");
             var result = await _appointmentService.GetAppointments();
 
             if (format.ToLower() == "excel")
@@ -132,7 +133,7 @@ public async Task<IActionResult> GetAllTerminals()
                 return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
             }
 
-            _logger.Info(DateTime.Today.ToLongDateString()+" : Fetched appointments successfully"); 
+            _logger.Info(DateTime.Today.ToLongDateString() + " : Fetched appointments successfully");
             return Ok(result); // Return as JSON
         }
 
@@ -201,18 +202,18 @@ public async Task<IActionResult> GetAllTerminals()
         [Authorize(Policy = Policy.RequireTruckingCompanyRole)]
         public async Task<IActionResult> DeleteAppointment(int appointmentId)
         {
-            _logger.Info(DateTime.Today.ToLongDateString()+" : DeleteAppointment process started for Id"  + appointmentId);
+            _logger.Info(DateTime.Today.ToLongDateString() + " : DeleteAppointment process started for Id" + appointmentId);
 
             try
             {
                 var result = await _appointmentService.DeleteAppointment(appointmentId);
-                _logger.Info(DateTime.Today.ToLongDateString()+" :  appointment  deleted successfully  with Id " +  appointmentId);
+                _logger.Info(DateTime.Today.ToLongDateString() + " :  appointment  deleted successfully  with Id " + appointmentId);
 
                 return Ok(new { message = result });
             }
             catch (Exception ex)
             {
-                _logger.Error(DateTime.Today.ToLongDateString()+" : Failed to delete appointment with Id  " + appointmentId + " " + ex.Message);
+                _logger.Error(DateTime.Today.ToLongDateString() + " : Failed to delete appointment with Id  " + appointmentId + " " + ex.Message);
                 return NotFound(new { message = ex.Message });
             }
         }
@@ -221,39 +222,48 @@ public async Task<IActionResult> GetAllTerminals()
         [Authorize(Policy = Policy.RequireTerminalRole)]
         public async Task<IActionResult> CancelAppointment(int appointmentId)
         {
-            _logger.Info(DateTime.Today.ToLongDateString()+" : CancelAppointment process started for Id " +  appointmentId);
+            _logger.Info(DateTime.Today.ToLongDateString() + " : CancelAppointment process started for Id " + appointmentId);
 
             try
             {
                 var result = await _appointmentService.CancelAppointment(appointmentId);
-                _logger.Info(DateTime.Today.ToLongDateString()+" : Appointment canceled successfully with Id   " + appointmentId);
+                _logger.Info(DateTime.Today.ToLongDateString() + " : Appointment canceled successfully with Id   " + appointmentId);
 
-                return Ok(new { message = result });
-            }
-            catch (Exception ex) {
-                _logger.Error(DateTime.Today.ToLongDateString()+" :  Failed to cancel appointment with Id " + appointmentId + " " + ex.Message);
-                return NotFound(new { message = ex.Message});
-            }
-        }
-
-        [HttpPut("approve/{appointmentId}")]
-        [Authorize(Policy = Policy.RequireTerminalRole)]
-        public async Task<IActionResult> ApproveAppointment(int appointmentId)
-        {
-            _logger.Info(DateTime.Today.ToLongDateString()+" : ApproveAppointment process started for Id"  +  appointmentId);
-
-            try
-            {
-                var result = await _appointmentService.ApproveAppointment(appointmentId);
-                _logger.Info(DateTime.Today.ToLongDateString()+" : Appointment approved successfully with Id " + appointmentId  );
                 return Ok(new { message = result });
             }
             catch (Exception ex)
             {
-                _logger.Error(DateTime.Today.ToLongDateString()+" :  Failed to Approve appointment with Id " + appointmentId + " " + ex.Message);
+                _logger.Error(DateTime.Today.ToLongDateString() + " :  Failed to cancel appointment with Id " + appointmentId + " " + ex.Message);
                 return NotFound(new { message = ex.Message });
             }
         }
 
+
+       [HttpGet("search")]
+[Authorize(Policy = Policy.RequireTerminalRole)]
+public async Task<IActionResult> SearchAppointmentsByDate([FromQuery] DateTime? filterDate)
+{
+    try
+    {
+        // Call the service to get appointments with the optional filter date
+        var appointments = await _appointmentService.GetAppointments(filterDate);
+
+        if (appointments == null || !appointments.Any())
+        {
+            return NotFound(new { message = "No appointments found for the selected date." });
+        }
+
+        return Ok(appointments);
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(StatusCodes.Status500InternalServerError, new { message = "An error occurred while searching for appointments." });
     }
 }
+
+
+    }
+
+}
+
+

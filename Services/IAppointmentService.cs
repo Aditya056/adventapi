@@ -10,6 +10,8 @@ namespace advent_appointment_booking.Services
     //    Task<string> UpdateAppointmentCreatedTime(int appointmentId, string newCreatedTime);
 
         Task<object> GetAppointment(int appointmentId);
+    Task<List<CreateAppointmentDTO>> GetAppointments(DateTime? filterDate);
+
         Task<IEnumerable<CreateAppointmentDTO>> GetAppointments();
         Task<string> DeleteAppointment(int appointmentId);
         Task<string> CancelAppointment(int appointmentId);
