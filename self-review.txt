@@ -1,0 +1,13 @@
+// SelfReview: Best practices 
+
+// Followed: 
+1. DI
+2. Single Responsibility Principle
+3. Repository pattern 
+4. Naming Convention 
+5. DTOs
+
+// Not-Followed:
+1. SOLID principles
+2. Log4Net
+3. Naming convention (endpoints)

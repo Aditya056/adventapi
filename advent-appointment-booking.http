@@ -1,0 +1,6 @@
+@advent_appointment_booking_HostAddress = http://localhost:5232
+
+GET {{advent_appointment_booking_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
