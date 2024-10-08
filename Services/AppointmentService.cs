@@ -40,7 +40,6 @@ namespace advent_appointment_booking.Services
             appointment.GateCode = gateCode;
 
             // Assuming appointment.AppointmentCreated is already provided in UTC, convert it to IST
-            appointment.AppointmentCreated = TimeZoneInfo.ConvertTimeFromUtc(appointment.AppointmentCreated, TimeZoneInfo.FindSystemTimeZoneById("India Standard Time"));
 
             // Set AppointmentLastModified to the current time in IST
             appointment.AppointmentLastModified = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("India Standard Time"));
