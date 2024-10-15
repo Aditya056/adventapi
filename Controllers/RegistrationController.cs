@@ -8,6 +8,7 @@ using log4net;
 namespace advent_appointment_booking.Controllers
 {
     [Route("api/[controller]")]
+    
     [ApiController]
     [AllowAnonymous]
     public class RegistrationController : ControllerBase
