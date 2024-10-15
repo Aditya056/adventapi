@@ -107,12 +107,6 @@ namespace advent_appointment_booking.Services
                 throw new Exception("Unauthorized or invalid appointment.");
 
             appointment.MoveType = updatedAppointment.MoveType;
-            // appointment.ContainerNumber = updatedAppointment.ContainerNumber;
-            // appointment.SizeType = updatedAppointment.SizeType;
-            // appointment.Line = updatedAppointment.Line;
-            // appointment.ChassisNo = updatedAppointment.ChassisNo;
-            // appointment.TerminalId = updatedAppointment.TerminalId;
-            // appointment.DriverId = updatedAppointment.DriverId;
             appointment.AppointmentLastModified = DateTime.UtcNow;
             appointment.AppointmentCreated = updatedAppointment.AppointmentCreated;
             _databaseContext.Appointments.Update(appointment);
@@ -167,29 +161,6 @@ namespace advent_appointment_booking.Services
 
     return appointments;
 }
-
-        // public async Task<string> UpdateAppointmentCreatedTime(int appointmentId, DateTime newCreatedTime)
-        // {
-        //     // Find the appointment by its ID
-        //     var appointment = await _databaseContext.Appointments.FindAsync(appointmentId);
-
-        //     if (appointment == null)
-        //     {
-        //         throw new Exception("Appointment not found.");
-        //     }
-
-        //     // Update only the AppointmentCreated field
-        //     appointment.AppointmentCreated = newCreatedTime;
-        //     appointment.AppointmentLastModified = DateTime.UtcNow;
-
-        //     // Mark the appointment as updated and save the changes
-        //     _databaseContext.Appointments.Update(appointment);
-        //     await _databaseContext.SaveChangesAsync();
-
-        //     return "Appointment created time updated successfully.";
-        // }
-
-
 
         // Get Appointment (Accessible to both Trucking Company and Terminal)
         public async Task<object> GetAppointment(int appointmentId)
